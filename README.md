@@ -56,7 +56,15 @@ In this exercise you will:
 
 ```bash
 # 1) The exact ssh command you ran
+       ssh sshuser@192.168.0.102
+
 # 2) A detailed, step-by-step explanation of what happened at each stage
+
+**TCP connection:**  Der ssh-client hat eine Tcp-Verbindung zum port 22 der Ip-Adresse 192.168.0.102 geoffnet
+**SSH-Handshake:**  Client und Server haben ihre Protokollversionen ausgetauscht und verschlüsselungsalgorithmen ausgehandelt
+**Authentifizeirung:**  ich habe das passwort für den Benutzer "sshuser" eigegeben , und der server hat den Zugriff gewährt.
+**Shell-Zuweisung:**  ich habe Zugriff auf eine entfernte Shell-sitzung auf dem Zielgerät erhalten
+**Beenden:** ich habe "exit" eigegeben, um die Sitzung ordnungsgemäß zu meinem lokalen Terminal zurückzukehren  
 ```
 
 ---
@@ -85,9 +93,12 @@ In this exercise you will:
 
 ```bash
 # 1) The ssh-keygen command you ran
+ssh-keygen -t ed25519 -C "manue@example.com"
 # 2) The file paths of the generated keys
+\Users\sshuser/.ssh/id_ed25519
 # 3) Your written explanation (3–5 sentences) of the signature process
-```
+Der private Schlüssel wird verwendet, um eine Herausforderung(Nachtricht) zu signieren, die vom server wahrend der ssh-Authentifierung erstellt wird. Der server überpruft die Signatur mit dem öffentlichen Schlüssel, ohne den privaten Schlüssel preiszugeben, was durch asymmetrische Kryptographie ermöglicht wird. Ed25519 wird bevorzugt, weil es eine hohe Sicherheit bietet, schnell und widerstandsfähig gegenüber modernen Angriffen ist, während es gleichzeitig eine hohe Leistung und Fehlerresistenz gewährleistet
+ ```
 
 ---
 
@@ -126,7 +137,19 @@ In this exercise you will:
 
 ```text
 # 1) The full contents of your ~/.ssh/config
+Host my-remote
+    HostName 192.168.0.102
+    User manue
+    IdentityFile ~/.ssh/id_ed25519
+
+Host backup-server
+    HostName 192.168.0.102
+    User sshuser
+    Port 2222
+    IdentityFile ~/.ssh/id_ed25519_backup
 # 2) A short explanation (3–4 sentences) of how the config simplifies connections
+
+Die Datei ~/.ssh/config ermöglicht es, Benutzerdefinierte Aliase für jeden Remote-Host zu erstellen. SSh liest diese Datei, um den Alias mit den entsprechenden Serverinformationen wie HostName, User und IdentityFile abzugleichen. Dardurch entfällt die Notwendigkeit, lange  ssh-Befehle einzugeben, da du einfach ssh my-remote oder ssh backup-server verwenden kannst.
 ```
 
 ---
@@ -163,8 +186,26 @@ In this exercise you will:
 
 ```bash
 # 1) Each scp command you ran
+
+**locale → remote
+scp C:/Users/sshuser/Documents/test.txt sshuser@192.168.0.102:~/destination/
+
+
+**remote → locale
+scp sshuser@192.168.0.102:~/log.txt C:/Users/sshuser/Downloads/
+
+
+**Remote → Remote
+scp -r sshuser@192.168.0.102:/home/sshuser/dir1 sshuser@192.168.0.102:/home/sshuser/dir2
+
+
 # 2) Any flags or options used
+-r: um Verzeichnisse rekursiv zu kopieren
+-p: gibt den port an, falls der ssh-Server auf einem anderen als ddem standardport (22) läuft
+
 # 3) A brief explanation (2–3 sentences) of scp’s mechanism
+
+SCP verwendet SSh im hintergrund, um eine sichere Verbindung zwischen den host herzustellen. fur jede Übertragung wird eine neue SSH- Sitzung gestartet, die den Benutzer authentifiziert und den Dateitransfert sicher durchführt
 ```
 
 ---
@@ -209,8 +250,18 @@ In this exercise you will:
 
 ```bash
 # 1) The contents of login_tasks.sh
+#!/usr/bin/env bash
+echo "Welcome $(whoami)! Today is $(date)."
+uptime
+ls ~/projects
+
 # 2) The lines you added to ~/.bashrc or ~/.profile
+**echo "source ~/login_tasks.sh" >> ~/.bashrc**
 # 3) Your explanation (3–5 sentences) of shell init files and sourcing vs. executing
+~/.bashrc wird bei interaktiven shells geladen
+~/.profile wird bei login-shells
+-source führt das skript im aktuelle shell aus
+
 ```
 
 ---
